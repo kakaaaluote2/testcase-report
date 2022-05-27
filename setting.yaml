@@ -1,0 +1,6 @@
+zentao:
+  host: 52.83.201.15
+  port: 3306
+  user: zentao
+  dbname: zentao
+  password: Xf%12$i0
