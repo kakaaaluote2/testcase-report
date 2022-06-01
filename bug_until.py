@@ -67,13 +67,13 @@ def init_bug_data(bug_tuple: list) -> list:
 
 
 def get_ci_time(bug_tuple):
-    min_bug_created_date = "9999-99-99 00:00:00"
-    max_bug_solved_date = "0000-00-00 00:00:00"
+    min_bug_created_date = bug_tuple[0]["bug_created_date"]
+    max_bug_solved_date = bug_tuple[0]["bug_solved_date"]
     for bug in bug_tuple:
         if bug["bug_created_date"] != "0000-00-00 00:00:00" and bug["bug_solved_date"] != "0000-00-00 00:00:00":
-            if bug["bug_created_date"] < min_bug_created_date:
+            if bug["bug_created_date"] <= min_bug_created_date:
                 min_bug_created_date = bug["bug_created_date"]
-            if bug["bug_solved_date"] > max_bug_solved_date:
+            if bug["bug_solved_date"] >= max_bug_solved_date:
                 max_bug_solved_date = bug["bug_solved_date"]
     min_bug_created_date = datetime.datetime.strptime(min_bug_created_date, "%Y-%m-%d %H:%M:%S")
     max_bug_solved_date = datetime.datetime.strptime(max_bug_solved_date, "%Y-%m-%d %H:%M:%S")

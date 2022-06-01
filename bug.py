@@ -109,12 +109,13 @@ def get_bug_data(product_name):
         # 判断阻塞性bug
         if bug["bug_title"].find("堵塞") != -1 or bug["bug_title"].find("阻塞") != -1:
             damping_bug_list.append(bug)
-            if bug["solved_time"] > 24:
-                damping_bug_greater_than_one_day_list.append(bug)
-            if 12 < bug["solved_time"] < 24:
-                damping_bug_greater_than_half_day_and_less_than_one_day_list.append(bug)
-            if bug["solved_time"] < 12:
-                damping_bug_less_than_half_day.append(bug)
+            if bug["solved_time"] is not None:
+                if bug["solved_time"] > 24:
+                    damping_bug_greater_than_one_day_list.append(bug)
+                if 12 < bug["solved_time"] < 24:
+                    damping_bug_greater_than_half_day_and_less_than_one_day_list.append(bug)
+                if bug["solved_time"] < 12:
+                    damping_bug_less_than_half_day.append(bug)
         # 二次缺陷bug
         if bug["bug_activated_times"] >= 1:
             secondary_defect_bug.append(bug)
@@ -137,11 +138,12 @@ def get_chart_index_and_data(bug_data_list: list, bug_date_type):
         if i > max_time:
             break
     bug_num_list = [0 for i in range(len(chart_index))]
+    bug_data_list_new = []
     for bug in bug_data_list:
-        if bug[bug_date_type] == "0000-00-00 00:00:00":
-            bug_data_list.remove(bug)
+        if bug[bug_date_type] != "0000-00-00 00:00:00":
+            bug_data_list_new.append(bug)
     for time, (i, bug_num) in zip(chart_index, enumerate(bug_num_list)):
-        for bug in bug_data_list:
+        for bug in bug_data_list_new:
             if datetime.datetime.strptime(bug[bug_date_type], "%Y-%m-%d %H:%M:%S") - time > datetime.timedelta(hours=1):
                 break
             if datetime.datetime.strptime(bug[bug_date_type], "%Y-%m-%d %H:%M:%S") >= time:
@@ -161,7 +163,6 @@ def get_chart_index_and_data(bug_data_list: list, bug_date_type):
         if flag == 1:
             break
     return time_list, bug_num_list
-
 
 
 if __name__ == '__main__':
