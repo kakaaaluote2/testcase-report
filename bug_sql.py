@@ -3,7 +3,7 @@ import datetime
 import pymysql
 import yaml
 
-from bug_until import init_bug_data, get_ci_time, get_bug_min_and_max_time
+from bug_tool import init_bug_data, get_ci_time, get_bug_min_and_max_time
 
 
 def init_zentao_mysql(config):
@@ -164,23 +164,6 @@ def get_chart_index_and_data(bug_data_list: list, bug_date_type):
             break
     return time_list, bug_num_list
 
-
-if __name__ == '__main__':
-    product_name = "【220426】美区商城-积分兑换 "
-    bug_data = get_bug_data(product_name)
-    bug_data_list = bug_data[0]
-    # for bug_time in bug_data_list:
-    #     print(bug_time['bug_solved_date'])
-    # print(len(bug_data_list))
-    bug_data_list.sort(key=lambda x: x["bug_solved_date"])
-    for bug in bug_data_list:
-        if bug["bug_solved_date"] == "0000-00-00 00:00:00":
-            bug_data_list.remove(bug)
-
-    index = get_chart_index_and_data(bug_data_list, 'bug_solved_date')[0]
-    bug_num_list = get_chart_index_and_data(bug_data_list, 'bug_solved_date')[1]
-    print(index, bug_num_list,sum(bug_num_list))
-    print(bug_data_list,len(bug_data_list))
 
 
 

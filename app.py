@@ -3,62 +3,45 @@ import csv
 import pandas as pd
 import streamlit as st
 
-from bug import get_bug_data, get_chart_index_and_data
+from bug_sql import get_bug_data, get_chart_index_and_data
+from online_sheet import get_online_sheet_data, get_interface_data
 
+project_name = "【220413】场景优化专项-平台功能"
 
-csv_file = open('data/report_data.csv', 'r', encoding="UTF-8")
-reader = csv.reader(csv_file)
-data_result = []
-for item in reader:
-    data_result.append(item)
-data_result.append(reader)
+sheet_data_dict = get_online_sheet_data(project_name)
 
 # 设置测试报告基本数据
-# 禅道项目名
-product_name = data_result[0][1]
-test_person = data_result[1][1]
-planning_test_time = data_result[2][1]
-actual_test_time = data_result[3][1]
+tester = sheet_data_dict['tester']
+planning_test_time = sheet_data_dict['planning_test_time']
+actual_test_time = sheet_data_dict['actual_test_time']
 
 # 提测延期时长
-sm_test_time_delay = data_result[4][1]
+sm_test_time_delay = sheet_data_dict['sm_test_time_delay']
 
 # 需求变更次数
-requirements_change_times = int(data_result[5][1])
-remark_requirements_change = data_result[6][1]
+requirements_change_times = int(sheet_data_dict['requirements_change_times'])
+remark_requirements_change = sheet_data_dict['remark_requirements_change']
 # 接口变更次数
-interface_change_times = int(data_result[7][1])
-remark_interface_change = data_result[8][1]
-risks = []
-for r in data_result[9]:
-    if r != data_result[9][0]:
-        risks.append(r)
-questions = []
-for qu in data_result[10]:
-    if qu != data_result[10][0]:
-        questions.append(qu)
-advices = []
-for ad in data_result[11]:
-    if ad != data_result[11][0]:
-        advices.append(ad)
+interface_change_times = int(sheet_data_dict['interface_change_times'])
+remark_interface_change = sheet_data_dict['remark_interface_change']
+risks = sheet_data_dict['risks']
+questions = sheet_data_dict['questions']
+advices = sheet_data_dict['advices']
+
 # 禅道项目bug链接
-remark_total_bug_num = data_result[12][1]
-
-
+remark_total_bug_num = sheet_data_dict['zentao_link']
 
 st.set_page_config(page_title=f"测试报告")
-st.header(f'{product_name}项目测试报告')
+st.header(f'{project_name}项目测试报告')
 st.subheader('测试结论')
-st.write(f'{product_name}CI环境完成测试，测试结果：**`测试通过`**')
-st.write(f'- 测试人员 {test_person}')
+st.write(f'{project_name}CI环境完成测试，测试结果：**`测试通过`**')
+st.write(f'- 测试人员 **{tester}**')
 st.write(f'- 计划时间 **{planning_test_time}** 天')
 st.write(f'- 实际时间 **{actual_test_time}** 天')
 st.write(f'- 提测延期时长 **{sm_test_time_delay}** 天')
-
-
 st.subheader('测试总结')
 
-bug_data = get_bug_data(product_name)
+bug_data = get_bug_data(project_name)
 
 if not bug_data:
     raise ValueError("请输入正确的项目名")
@@ -150,8 +133,7 @@ bug_data = [
 
 df = pd.DataFrame(data=bug_data, index=bug_index, columns=['数据', '备注'])
 
-st.write(df)
-
+st.table(df)
 
 st.subheader('Bug生成和解决时间分布图')
 index = get_chart_index_and_data(bug_data_list, 'bug_created_date')[0]
@@ -184,28 +166,26 @@ annotations_df = pd.DataFrame(
 st.line_chart(annotations_df)
 st.subheader('风险')
 
-for i, r in enumerate(risks):
-    st.markdown(f"{i}. {r}")
+if not risks:
+    st.markdown("暂无")
+else:
+    for i, r in enumerate(risks):
+        st.markdown(f"**{i+1}**. {r}")
 
 st.subheader('问题和建议')
-
-for (i, question), advice in zip(enumerate(questions), advices):
-    st.write(f"**问题** **{i+1}**:  {question}")
-    st.write(f"**建议** **{i+1}**:  {advice}")
+if not questions:
+    st.markdown("暂无")
+else:
+    for (i, question), advice in zip(enumerate(questions), advices):
+        st.write(f"**问题** **{i+1}**:  {question}")
+        st.write(f"**建议** **{i+1}**:  {advice}")
 
 
 st.subheader('测试覆盖的接口')
 
 # 读取xlsx文件
-csv_file = open('data/api.csv', 'r', encoding="UTF-8")
-reader = csv.reader(csv_file)
-result = []
-api_sheet_columns = []
-for item in reader:
-    if reader.line_num == 1:
-        api_sheet_columns = item
-    else:
-        result.append(item)
+api_sheet_columns = ['接口名', '接口URL']
+result = get_interface_data(project_name)
 
 df = pd.DataFrame(data=result, columns=api_sheet_columns)
 st.table(df)
