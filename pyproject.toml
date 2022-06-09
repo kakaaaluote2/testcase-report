@@ -11,6 +11,7 @@ streamlit = "^1.10.0"
 gspread = "^5.4.0"
 PyMySQL = "^1.0.2"
 matplotlib = "^3.5.2"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
 
