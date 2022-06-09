@@ -5,7 +5,7 @@ description = ""
 authors = ["Linkhao"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.7"
 pandas = "^1.4.2"
 streamlit = "^1.10.0"
 gspread = "^5.4.0"
