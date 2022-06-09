@@ -93,6 +93,16 @@ def get_bug_data(product_name):
     zentao_cursor = db_zentao.cursor()
     bug_tuple = get_bug_list(product_name, zentao_cursor)
     bug_data_list = init_bug_data(bug_tuple)
+    # 去掉app的bug
+    delete_bug_list = []
+    for i, bug in enumerate(bug_data_list):
+        if bug["bug_title"].find("CI") != -1 and bug["bug_title"].find("云平台") != 1:
+            continue
+        else:
+            delete_bug_list.append(bug)
+    for bug in delete_bug_list:
+        if bug in bug_data_list:
+            bug_data_list.remove(bug)
     # 阻塞bug
     damping_bug_list = []
     # 阻塞bug解决时间大于1天
@@ -152,16 +162,19 @@ def get_chart_index_and_data(bug_data_list: list, bug_date_type):
     for time, bug_created_num in zip(chart_index, bug_num_list):
         if bug_created_num != 0:
             time_list.append(time)
-    while True:
-        flag = 0
-        for time, bug_num in zip(chart_index, bug_num_list):
-            if bug_num == 0:
-                bug_num_list.remove(bug_num)
-        for index, num in enumerate(bug_num_list):
-            if index == len(bug_num_list) - 1 and num != 0:
-                flag = 1
-        if flag == 1:
-            break
+    while 0 in bug_num_list:
+        bug_num_list.remove(0)
+
+    max_x_limit = 30
+    # 限制图像x轴坐标个数
+    delta_num = len(bug_num_list) - max_x_limit  # 减少的坐标轴个数
+    kedu = round(len(bug_num_list) / delta_num)
+    if len(bug_num_list) > max_x_limit:
+        for time, (i, bug_num) in zip(time_list, enumerate(bug_num_list)):
+            if i != len(bug_num_list) - 1 and i != 0 and i % kedu == 0:
+                bug_num_list[i-1] += bug_num
+                del bug_num_list[i]
+                del time_list[i]
     return time_list, bug_num_list
 
 

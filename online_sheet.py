@@ -10,28 +10,28 @@ import xlrd
 
 cur_path = os.path.abspath(os.path.dirname(__file__))
 gc = gspread.service_account(filename=cur_path + "\\service_account.json")
-
+sh = gc.open("测试报告")
 
 def get_online_sheet_data(project_name: str) -> dict:
-
-    sh = gc.open("测试报告")
     worksheet = sh.worksheet(project_name)
+    worksheet_result = worksheet.get_all_records()
+    worksheet_result_value = [d['子项'] for d in worksheet_result]
     # 测试人员
-    tester = worksheet.acell('B2').value
+    tester = worksheet_result_value[0]
     # 计划测试时间
-    planning_test_time = worksheet.acell('B3').value
+    planning_test_time = worksheet_result_value[1]
     # 实际测试时间
-    actual_test_time = worksheet.acell('B4').value
+    actual_test_time = worksheet_result_value[2]
     # 提测延期时长
-    sm_test_time_delay = worksheet.acell('B5').value
+    sm_test_time_delay = worksheet_result_value[3]
     # 需求变更次数
-    requirements_change_times = worksheet.acell('B6').value
+    requirements_change_times = worksheet_result_value[4]
     # 需求变更备注
-    remark_requirements_change = worksheet.acell('B7').value
+    remark_requirements_change = worksheet_result_value[5]
     # 接口变更次数
-    interface_change_times = worksheet.acell('B8').value
+    interface_change_times = worksheet_result_value[6]
     # 接口变更备注
-    remark_interface_change = worksheet.acell('B9').value
+    remark_interface_change = worksheet_result_value[7]
     # 风险
     risks = worksheet.row_values(10)[1:]
     # 问题
@@ -55,7 +55,6 @@ def get_online_sheet_data(project_name: str) -> dict:
 
 
 def get_interface_data(project_name: str):
-    sh = gc.open("测试报告")
     worksheet = sh.worksheet(project_name)
     interface_data_list = []
     interface_data_url_list = worksheet.col_values(2)[15:]
@@ -65,7 +64,28 @@ def get_interface_data(project_name: str):
     return interface_data_list
 
 
+def get_not_hidden_project_name_list() -> list:
+    not_hidden_project_name_list = []
+    fetch_sheet_metadata = sh.fetch_sheet_metadata()
+    for i in fetch_sheet_metadata['sheets']:
+        try:
+            if i['properties']['hidden']:
+                continue
+        except KeyError:
+            not_hidden_project_name_list.append(i['properties']['title'])
+    return not_hidden_project_name_list
+
 if __name__ == '__main__':
-    project_name = "【220413】场景优化专项-平台功能"
-    data_dict = get_online_sheet_data(project_name)
-    print(data_dict)
+    project_name = '【220413】场景优化专项-平台功能'
+    worksheet = sh.worksheet(project_name)
+    result = worksheet.get_all_records()
+    result_value = [d['子项'] for d in result]
+    # interface_data_url_list = [d['接口URL'] for d in result if d['接口URL'] != '']
+    # interface_data_name_list = [d['接口名称'] for d in result if d['接口名称'] != '']
+    print(result)
+    print(result_value)
+    # print(interface_data_url_list)
+    # print(interface_data_name_list)
+
+
+

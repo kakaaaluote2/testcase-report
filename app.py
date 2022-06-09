@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from pylab import mpl
 
 from bug_sql import get_bug_data, get_chart_index_and_data
-from online_sheet import get_online_sheet_data, get_interface_data
+from online_sheet import get_online_sheet_data, get_interface_data, get_not_hidden_project_name_list
 
 # 设置中文字体格式
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -13,8 +13,8 @@ mpl.rcParams['axes.unicode_minus'] = False
 # project_name = "【220413】场景优化专项-平台功能"
 
 st.set_page_config(page_title=f"测试报告")
-
-project_name = st.text_input('请输入禅道项目名', "【220413】场景优化专项-平台功能")
+project_name_list = get_not_hidden_project_name_list()
+project_name = st.selectbox('请输入禅道项目名', project_name_list)
 
 sheet_data_dict = get_online_sheet_data(project_name)
 
@@ -40,14 +40,15 @@ advices = sheet_data_dict['advices']
 remark_total_bug_num = sheet_data_dict['zentao_link']
 
 
-st.header(f'{project_name} 测试报告')
+st.markdown(f'## 【测试报告】【CI环境】{project_name} 测试报告')
 st.subheader('测试结论')
 st.write(f'- {project_name}CI环境完成测试，测试结果：**`测试通过`**')
 st.write(f'- 测试人员 **{tester}**')
-st.write(f'- 计划时间 **{planning_test_time}** 天')
-st.write(f'- 实际时间 **{actual_test_time}** 天')
-st.write(f'- 提测延期时长 **{sm_test_time_delay}** 天')
+st.write(f'- 计划时间 **{planning_test_time}** ')
+st.write(f'- 实际时间 **{actual_test_time}** ')
+st.write(f'- 提测延期时长 **{sm_test_time_delay}** ')
 st.subheader('测试总结')
+
 
 bug_data = get_bug_data(project_name)
 
@@ -137,6 +138,20 @@ bug_data = [
 ]
 df = pd.DataFrame(data=bug_data, index=bug_index, columns=['数据', '备注'])
 st.table(df)
+# markdown 表格
+# table = f"|数据项|数据|备注|\n" \
+#         f"|  ----  | ----  |----  |\n" \
+#         f"| 阻塞性bug  | {damping_bug_num} | {remark_damping_bug}|\n" \
+#         f"| 阻塞性bug修复<br/>时长超过1天的数量  | {damping_bug_greater_than_one_day_num} | {remark_damping_bug_greater_than_one_day}|\n" \
+#         f"| 阻塞性bug修复时长超过半天小于1天的数量  | {damping_bug_greater_than_half_day_and_less_than_one_day_num} | {remark_damping_bug_greater_than_half_day_and_less_than_one_day}|\n" \
+#         f"| 阻塞性bug修复时长小于半天的数量  | {damping_bug_less_than_half_day_num} | {remark_damping_bug_less_than_half_day}|\n" \
+#         f"| 二次缺陷数量  | {secondary_defect_num} | {remark_secondary_defect_bug}|\n" \
+#         f"| 总bug数量  | {total_bug_num} | {remark_total_bug_num}|\n" \
+#         f"| 禅道遗留未解决bug  | {not_solved_bug_num} | {remark_not_solved_bug}|\n" \
+#         f"| 需求变更次数  | {requirements_change_times} | {remark_requirements_change}|\n" \
+#         f"| 接口变更次数  | {interface_change_times} | {remark_interface_change}|\n"
+# st.markdown(table)
+
 data = bug_data
 column_labels = ['数据', '备注']
 
@@ -151,88 +166,90 @@ column_labels = ['数据', '备注']
 # st.pyplot(fig)
 
 # index = pd.MultiIndex.from_tuples(bug_index, names=['first', 'second'])
-index, bug_num_list = get_chart_index_and_data(bug_data_list, 'bug_created_date')
-for i, value in enumerate(index):
-    index[i] = str(index[i])
+try:
+    index, bug_num_list = get_chart_index_and_data(bug_data_list, 'bug_created_date')
+    for i, value in enumerate(index):
+        index[i] = str(index[i])
 
-st.subheader('Bug生成和解决时间分布图')
-# index = pd.to_datetime(index, dayfirst=True, format='%Y-%m-%d %H:%M:%S')
-fig, ax = plt.subplots(figsize=(10, 6))
-fig.autofmt_xdate()
-ax.set_yticks(bug_num_list)
-ax.set_title("BUG生成分布图")
-ax.set_xlabel('日期')
-ax.set_ylabel('BUG生成数量')
-for i, v in enumerate(bug_num_list):
-    ax.text(index[i], bug_num_list[i], bug_num_list[i], color='r', fontsize=15)
+    st.subheader('Bug生成和解决时间分布图')
+    # index = pd.to_datetime(index, dayfirst=True, format='%Y-%m-%d %H:%M:%S')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    fig.autofmt_xdate()
+    ax.set_yticks(bug_num_list)
+    ax.set_title("BUG生成分布图")
+    ax.set_xlabel('日期')
+    ax.set_ylabel('BUG生成数量')
+    for i, v in enumerate(bug_num_list):
+        ax.text(index[i], bug_num_list[i] + 0.1, bug_num_list[i], color='r', fontsize=15)
 
-ax.plot(index, bug_num_list, 's-', color='r', label='BUG数量')
-ax.legend(loc='best')
-st.pyplot(fig)
+    ax.plot(index, bug_num_list, 'o-', color='r', label='BUG数量')
+    ax.legend(loc='best')
+    st.pyplot(fig)
 
-# 生成表格
+    # 生成表格
+
+    # annotations_df = pd.DataFrame(
+    #     bug_num_list,
+    #     index=index,
+    #     columns=["每小时生成bug数量"]
+    # )
+    # st.line_chart(annotations_df)
+
+    bug_data_list.sort(key=lambda x: x["bug_solved_date"])
+    for bug in bug_data_list:
+        if bug["bug_solved_date"] == "0000-00-00 00:00:00":
+            bug_data_list.remove(bug)
+    index = get_chart_index_and_data(bug_data_list, 'bug_solved_date')[0]
+    for i, value in enumerate(index):
+        index[i] = str(index[i])
+    bug_num_list = get_chart_index_and_data(bug_data_list, 'bug_solved_date')[1]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    fig.autofmt_xdate()
+    ax.set_yticks(bug_num_list)
+    ax.set_title("Bug解决分布图")
+    ax.set_xlabel('日期')
+    ax.set_ylabel('BUG解决数量')
+    for i, v in enumerate(bug_num_list):
+        ax.text(index[i], bug_num_list[i] + 0.1, bug_num_list[i], color='g', fontsize=15)
+
+    ax.plot(index, bug_num_list, 'o-', color='g', label='BUG数量')
+    ax.legend(loc='best')
+    st.pyplot(fig)
+
+    # annotations_df = pd.DataFrame(
+    #     bug_num_list,
+    #     index=index,
+    #     columns=["每小时解决bug数量"]
+    # )
+    # annotations_df.index = pd.to_datetime(annotations_df.index)
+    # st.write(annotations_df)
+    # st.line_chart(annotations_df)
+    st.subheader('风险')
+
+    if not risks:
+        st.markdown("暂无")
+    else:
+        for i, r in enumerate(risks):
+            st.markdown(f"**{i + 1}**. {r}")
+
+    st.subheader('问题和建议')
+    if not questions:
+        st.markdown("暂无")
+    else:
+        for (i, question), advice in zip(enumerate(questions), advices):
+            st.write(f"**问题** **{i + 1}**:  {question}")
+            st.write(f"**建议** **{i + 1}**:  {advice}")
+
+    st.subheader('测试覆盖的接口')
+
+    # 读取xlsx文件
+    api_sheet_columns = ['接口名', '接口URL']
+    result = get_interface_data(project_name)
+
+    df = pd.DataFrame(data=result, columns=api_sheet_columns)
+    st.table(df)
+except ValueError:
+    st.markdown("**禅道项目名不正确!!!!!!**")
 
 
-# annotations_df = pd.DataFrame(
-#     bug_num_list,
-#     index=index,
-#     columns=["每小时生成bug数量"]
-# )
-# st.line_chart(annotations_df)
-
-
-bug_data_list.sort(key=lambda x: x["bug_solved_date"])
-for bug in bug_data_list:
-    if bug["bug_solved_date"] == "0000-00-00 00:00:00":
-        bug_data_list.remove(bug)
-index = get_chart_index_and_data(bug_data_list, 'bug_solved_date')[0]
-for i, value in enumerate(index):
-    index[i] = str(index[i])
-bug_num_list = get_chart_index_and_data(bug_data_list, 'bug_solved_date')[1]
-
-fig, ax = plt.subplots(figsize=(10, 6))
-fig.autofmt_xdate()
-ax.set_yticks(bug_num_list)
-ax.set_title("Bug解决分布图")
-ax.set_xlabel('日期')
-ax.set_ylabel('BUG解决数量')
-for i, v in enumerate(bug_num_list):
-    ax.text(index[i], bug_num_list[i], bug_num_list[i], color='g', fontsize=15)
-
-ax.plot(index, bug_num_list, 'o-', color='g', label='BUG数量')
-ax.legend(loc='best')
-st.pyplot(fig)
-
-# annotations_df = pd.DataFrame(
-#     bug_num_list,
-#     index=index,
-#     columns=["每小时解决bug数量"]
-# )
-# annotations_df.index = pd.to_datetime(annotations_df.index)
-# st.write(annotations_df)
-# st.line_chart(annotations_df)
-st.subheader('风险')
-
-if not risks:
-    st.markdown("暂无")
-else:
-    for i, r in enumerate(risks):
-        st.markdown(f"**{i+1}**. {r}")
-
-st.subheader('问题和建议')
-if not questions:
-    st.markdown("暂无")
-else:
-    for (i, question), advice in zip(enumerate(questions), advices):
-        st.write(f"**问题** **{i+1}**:  {question}")
-        st.write(f"**建议** **{i+1}**:  {advice}")
-
-
-st.subheader('测试覆盖的接口')
-
-# 读取xlsx文件
-api_sheet_columns = ['接口名', '接口URL']
-result = get_interface_data(project_name)
-
-df = pd.DataFrame(data=result, columns=api_sheet_columns)
-st.table(df)
