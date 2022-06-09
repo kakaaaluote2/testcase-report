@@ -3,8 +3,9 @@ import os
 import gspread
 
 cur_path = os.path.abspath(os.path.dirname(__file__))
-gc = gspread.service_account(filename=cur_path + "\\service_account.json")
+gc = gspread.service_account(filename=cur_path + "/service_account.json")
 sh = gc.open("测试报告")
+
 
 def get_online_sheet_data(project_name: str) -> dict:
     worksheet = sh.worksheet(project_name)
