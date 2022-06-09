@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 from pylab import mpl
 
 from bug_sql import get_bug_data, get_chart_index_and_data

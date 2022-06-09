@@ -2,12 +2,6 @@ import os
 
 import gspread
 
-import pandas as pd
-import requests
-
-import pytz
-import xlrd
-
 cur_path = os.path.abspath(os.path.dirname(__file__))
 gc = gspread.service_account(filename=cur_path + "\\service_account.json")
 sh = gc.open("测试报告")

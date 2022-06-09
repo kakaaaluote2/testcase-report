@@ -3,7 +3,7 @@ import datetime
 import pymysql
 import yaml
 
-from bug_tool import init_bug_data, get_ci_time, get_bug_min_and_max_time
+from bug_tool import init_bug_data, get_bug_min_and_max_time
 
 
 def init_zentao_mysql(config):
