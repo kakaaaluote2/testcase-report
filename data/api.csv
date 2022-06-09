@@ -1,4 +1,0 @@
-接口名称,接口URL
-获取区域配置,/recipeManagement/v3/getMetaRegion
-获取大类列表,/recipeManagement/v3/getCategoryList
-根据区域获取设备列表,	/recipeManagement/v3/getDeviceList

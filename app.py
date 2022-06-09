@@ -1,12 +1,20 @@
-import csv
-
 import pandas as pd
 import streamlit as st
+from matplotlib import pyplot as plt
+from pylab import mpl
 
 from bug_sql import get_bug_data, get_chart_index_and_data
 from online_sheet import get_online_sheet_data, get_interface_data
 
-project_name = "【220413】场景优化专项-平台功能"
+# 设置中文字体格式
+mpl.rcParams['font.sans-serif'] = ['SimHei']
+mpl.rcParams['axes.unicode_minus'] = False
+
+# project_name = "【220413】场景优化专项-平台功能"
+
+st.set_page_config(page_title=f"测试报告")
+
+project_name = st.text_input('请输入禅道项目名', "【220413】场景优化专项-平台功能")
 
 sheet_data_dict = get_online_sheet_data(project_name)
 
@@ -31,10 +39,10 @@ advices = sheet_data_dict['advices']
 # 禅道项目bug链接
 remark_total_bug_num = sheet_data_dict['zentao_link']
 
-st.set_page_config(page_title=f"测试报告")
-st.header(f'{project_name}项目测试报告')
+
+st.header(f'{project_name} 测试报告')
 st.subheader('测试结论')
-st.write(f'{project_name}CI环境完成测试，测试结果：**`测试通过`**')
+st.write(f'- {project_name}CI环境完成测试，测试结果：**`测试通过`**')
 st.write(f'- 测试人员 **{tester}**')
 st.write(f'- 计划时间 **{planning_test_time}** 天')
 st.write(f'- 实际时间 **{actual_test_time}** 天')
@@ -127,27 +135,52 @@ bug_data = [
     (requirements_change_times, remark_requirements_change),
     (interface_change_times, remark_interface_change),
 ]
+df = pd.DataFrame(data=bug_data, index=bug_index, columns=['数据', '备注'])
+st.table(df)
+data = bug_data
+column_labels = ['数据', '备注']
+
+# fig, ax = plt.subplots()
+#
+# ax.axis('off')
+# table = ax.table(cellText=data, rowLabels=bug_index, colLabels=column_labels, loc="center")
+# table.auto_set_font_size(False)
+# table.set_fontsize(20)
+# table.scale(1, 1)
+# ax.title.set_text("表格标题")
+# st.pyplot(fig)
+
 # index = pd.MultiIndex.from_tuples(bug_index, names=['first', 'second'])
+index, bug_num_list = get_chart_index_and_data(bug_data_list, 'bug_created_date')
+for i, value in enumerate(index):
+    index[i] = str(index[i])
+
+st.subheader('Bug生成和解决时间分布图')
+# index = pd.to_datetime(index, dayfirst=True, format='%Y-%m-%d %H:%M:%S')
+fig, ax = plt.subplots(figsize=(10, 6))
+fig.autofmt_xdate()
+ax.set_yticks(bug_num_list)
+ax.set_title("BUG生成分布图")
+ax.set_xlabel('日期')
+ax.set_ylabel('BUG生成数量')
+for i, v in enumerate(bug_num_list):
+    ax.text(index[i], bug_num_list[i], bug_num_list[i], color='r', fontsize=15)
+
+ax.plot(index, bug_num_list, 's-', color='r', label='BUG数量')
+ax.legend(loc='best')
+st.pyplot(fig)
 
 # 生成表格
 
-df = pd.DataFrame(data=bug_data, index=bug_index, columns=['数据', '备注'])
 
-st.table(df)
+# annotations_df = pd.DataFrame(
+#     bug_num_list,
+#     index=index,
+#     columns=["每小时生成bug数量"]
+# )
+# st.line_chart(annotations_df)
 
-st.subheader('Bug生成和解决时间分布图')
-index = get_chart_index_and_data(bug_data_list, 'bug_created_date')[0]
-for i, value in enumerate(index):
-    index[i] = str(index[i])
-bug_num_list = get_chart_index_and_data(bug_data_list, 'bug_created_date')[1]
-annotations_df = pd.DataFrame(
-    bug_num_list,
-    index=index,
-    columns=["每小时生成bug数量"]
-)
-# annotations_df.index = pd.to_datetime(annotations_df.index)
-# st.write(annotations_df)
-st.line_chart(annotations_df)
+
 bug_data_list.sort(key=lambda x: x["bug_solved_date"])
 for bug in bug_data_list:
     if bug["bug_solved_date"] == "0000-00-00 00:00:00":
@@ -156,14 +189,28 @@ index = get_chart_index_and_data(bug_data_list, 'bug_solved_date')[0]
 for i, value in enumerate(index):
     index[i] = str(index[i])
 bug_num_list = get_chart_index_and_data(bug_data_list, 'bug_solved_date')[1]
-annotations_df = pd.DataFrame(
-    bug_num_list,
-    index=index,
-    columns=["每小时解决bug数量"]
-)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+fig.autofmt_xdate()
+ax.set_yticks(bug_num_list)
+ax.set_title("Bug解决分布图")
+ax.set_xlabel('日期')
+ax.set_ylabel('BUG解决数量')
+for i, v in enumerate(bug_num_list):
+    ax.text(index[i], bug_num_list[i], bug_num_list[i], color='g', fontsize=15)
+
+ax.plot(index, bug_num_list, 'o-', color='g', label='BUG数量')
+ax.legend(loc='best')
+st.pyplot(fig)
+
+# annotations_df = pd.DataFrame(
+#     bug_num_list,
+#     index=index,
+#     columns=["每小时解决bug数量"]
+# )
 # annotations_df.index = pd.to_datetime(annotations_df.index)
 # st.write(annotations_df)
-st.line_chart(annotations_df)
+# st.line_chart(annotations_df)
 st.subheader('风险')
 
 if not risks:
