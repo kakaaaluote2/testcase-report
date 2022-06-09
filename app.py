@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-from pylab import mpl
+from matplotlib.pylab import mpl
 
 from bug_sql import get_bug_data, get_chart_index_and_data
 from online_sheet import get_online_sheet_data, get_interface_data, get_not_hidden_project_name_list
