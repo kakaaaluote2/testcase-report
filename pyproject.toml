@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "testcase-report"
+version = "1.0.0"
+description = ""
+authors = ["Linkhao"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^1.4.2"
+streamlit = "^1.10.0"
+gspread = "^5.4.0"
+PyMySQL = "^1.0.2"
+matplotlib = "^3.5.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
