@@ -7,7 +7,7 @@ from bug_sql import get_bug_data, get_chart_index_and_data
 from online_sheet import get_online_sheet_data, get_interface_data, get_not_hidden_project_name_list
 
 # 设置中文字体格式
-mpl.rcParams['font.sans-serif'] = ['SimHei']
+mpl.rcParams['font.sans-serif'] = ['simhei']
 mpl.rcParams['axes.unicode_minus'] = False
 
 # project_name = "【220413】场景优化专项-平台功能"
@@ -176,13 +176,13 @@ try:
     fig, ax = plt.subplots(figsize=(10, 6))
     fig.autofmt_xdate()
     ax.set_yticks(bug_num_list)
-    ax.set_title("BUG生成分布图")
-    ax.set_xlabel('日期')
-    ax.set_ylabel('BUG生成数量')
+    ax.set_title("BUG of generated distribution")
+    ax.set_xlabel('datetime')
+    ax.set_ylabel('BUG of generated num')
     for i, v in enumerate(bug_num_list):
         ax.text(index[i], bug_num_list[i] + 0.1, bug_num_list[i], color='r', fontsize=15)
 
-    ax.plot(index, bug_num_list, 'o-', color='r', label='BUG数量')
+    ax.plot(index, bug_num_list, 'o-', color='r', label='BUG num')
     ax.legend(loc='best')
     st.pyplot(fig)
 
@@ -207,13 +207,13 @@ try:
     fig, ax = plt.subplots(figsize=(10, 6))
     fig.autofmt_xdate()
     ax.set_yticks(bug_num_list)
-    ax.set_title("Bug解决分布图")
-    ax.set_xlabel('日期')
-    ax.set_ylabel('BUG解决数量')
+    ax.set_title("Bug of solved distribution")
+    ax.set_xlabel('datetime')
+    ax.set_ylabel('BUG of soled num')
     for i, v in enumerate(bug_num_list):
         ax.text(index[i], bug_num_list[i] + 0.1, bug_num_list[i], color='g', fontsize=15)
 
-    ax.plot(index, bug_num_list, 'o-', color='g', label='BUG数量')
+    ax.plot(index, bug_num_list, 'o-', color='g', label='BUG num')
     ax.legend(loc='best')
     st.pyplot(fig)
 
